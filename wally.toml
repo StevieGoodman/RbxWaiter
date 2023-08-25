@@ -1,6 +1,6 @@
 [package]
-name = "steviegoodman/library-nmae"
-description = "No description provided."
+name = "steviegoodman/waiter"
+description = "Have your Roblox hierarchy instances served to you succinctly and safely!"
 version = "1.0.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
