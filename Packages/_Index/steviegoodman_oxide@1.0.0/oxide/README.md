@@ -1,0 +1,2 @@
+# Oxide
+Oxide is a Luau library that integrates Rust types and functionality directly into Roblox. Say no to bad (or non existant) error handling! Say no to inexhaustive `if` statements! Write high-level, bug-free code you can be confident in today!
