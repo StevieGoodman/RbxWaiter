@@ -7,11 +7,14 @@
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
 
+            "Packages": {
+                "$path": "Packages"
+            },
             "Modules": {
                 "$className": "Folder",
 
                 "LibraryName": {
-                    "$path": "src/Waiter.luau"
+                    "$path": "src/Waiter.lua"
                 }
             }
         }
