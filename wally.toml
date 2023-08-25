@@ -1,0 +1,9 @@
+[package]
+name = "steviegoodman/library-nmae"
+description = "No description provided."
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+Oxide = "steviegoodman/oxide@1.0.0"

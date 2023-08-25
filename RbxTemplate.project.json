@@ -1,0 +1,19 @@
+{
+    "name": "LibraryName",
+
+    "tree": {
+        "$className": "DataModel",
+
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+
+            "Modules": {
+                "$className": "Folder",
+
+                "LibraryName": {
+                    "$path": "src/LibraryName.luau"
+                }
+            }
+        }
+    }
+}
