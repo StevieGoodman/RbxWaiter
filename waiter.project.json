@@ -10,12 +10,8 @@
             "Packages": {
                 "$path": "Packages"
             },
-            "Modules": {
-                "$className": "Folder",
-
-                "LibraryName": {
-                    "$path": "src/Waiter.lua"
-                }
+            "Waiter": {
+                "$path": "src/Waiter.lua"
             }
         }
     }
