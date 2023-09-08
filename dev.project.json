@@ -9,9 +9,6 @@
 
             "Packages": {
                 "$path": "Packages"
-            },
-            "Waiter": {
-                "$path": "src/Waiter.lua"
             }
         }
     }

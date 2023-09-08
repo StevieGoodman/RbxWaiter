@@ -1,9 +1,11 @@
 [package]
 name = "steviegoodman/waiter"
 description = "Have your Roblox hierarchy instances served to you with convenience!"
-version = "2.0.0"
+version = "2.0.7"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
+exclude = ["**"]
+include = ["src", "src/*", "waiter.project.json", "wally.toml"]
 
 [dependencies]
 TableUtil = "sleitnick/table-util@1.2.0"

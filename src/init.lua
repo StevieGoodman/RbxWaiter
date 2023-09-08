@@ -3,8 +3,7 @@
     Obtain instances in your game hierarchy with zero fuss!
 ]=]--
 
-local REPL_STORE = game:GetService("ReplicatedStorage")
-local TABLE_UTIL = require(REPL_STORE.Packages.TableUtil)
+local TABLE_UTIL = require(script.Parent.TableUtil)
 
 --[=[
     @within Waiter
