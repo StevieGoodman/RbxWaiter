@@ -4,149 +4,229 @@
 ]=]--
 
 local REPL_STORE = game:GetService("ReplicatedStorage")
+local TABLE_UTIL = require(REPL_STORE.Packages.TableUtil)
 
 --[=[
     @within Waiter
-    Returns the first child of `origin` matching `targetName` and `targetTag`.
+    @interface FilterOptions
+    .Tag string? -- Matches against instances with this tag
+    .ClassName string? -- Matches against instances with this class name
+    .Name string? -- Matches against instances with this name
+    .Attributes {string: any?} -- Matches against instances with all of these attributes
+]=]--
+export type FilterOptions = {
+    Tag: string?,
+    ClassName: string?,
+    Name: string?,
+    Attributes: {string: any?}
+}
+
+function _Filter(instances: {Instance}, filter: FilterOptions?): {Instance}
+    if not filter then
+        return instances
+    end
+    instances = TABLE_UTIL.Filter(instances, function(instance)
+        if filter.Tag and not instance:HasTag(filter.Tag) then
+            return false
+        end
+        if filter.ClassName and instance.ClassName ~= filter.ClassName then
+            return false
+        end
+        if filter.Name and instance.Name ~= filter.Name then
+            return false
+        end
+        if filter.Attributes then
+            for attributeName, attributeValue in filter.Attributes do
+                if instance:GetAttribute(attributeName) == attributeValue then continue end
+                return false
+            end
+        end
+        return true
+    end)
+    return instances
+end
+
+--[=[
+    @within Waiter
+    Returns the children of `origin` matching `filter`.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
+    @return {Instance?} -- The instances found (if any).
+]=]--
+function GetChildren(origin: Instance, filter: FilterOptions?): {Instance?}
+    local children = origin:GetChildren()
+    local result = _Filter(children, filter)
+    return result
+end
+
+--[=[
+    @within Waiter
+    Returns the first child of `origin` matching `filter`.
+    @param origin Instance -- The instance to use as origin for the search.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
     @return Instance? -- The instance found (if any).
 ]=]--
-function GetChild(origin: Instance, targetName: string, targetTag: string?): Instance?
-    local result = origin:FindFirstChild(targetName)
-    if result and targetTag then
-        result = if result:HasTag(targetTag) then result else nil
-    end
-    return result
+function GetChild(origin: Instance, filter: FilterOptions?): Instance?
+    local result = GetChildren(origin, filter)
+    return result[1]
 end
 
 --[=[
     @within Waiter
-    Returns the first children of `origin` matching `targetNames` and `targetTag`.
+    Collects children with different `FilterOptions` in a table for easy access.
+    This is especially useful for collecting key instances in models or user interfaces.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
 ]=]--
-function GetChildren(origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
+function CollectChildren(origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
     local result = {}
-    for index, targetName in targetNames do
-        result[index] = GetChild(origin, targetName, targetTag)
+    for index, filter in filters do
+        result[index] = GetChild(origin, filter)
     end
     return result
 end
 
 --[=[
     @within Waiter
-    Returns the first descendants of `origin` matching `targetNames` and `targetTag`.
+    Returns the descendants of `origin` matching `filter`.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
+    @return {Instance?} -- The instances found (if any).
+]=]--
+function GetDescendants(origin: Instance, filter: FilterOptions?): {Instance?}
+    local descendants = origin:GetDescendants()
+    local result = _Filter(descendants, filter)
+    return result
+end
+
+--[=[
+    @within Waiter
+    Returns the first descendant of `origin` matching `filter`.
+    @param origin Instance -- The instance to use as origin for the search.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
     @return Instance? -- The instance found (if any).
 ]=]--
-function GetDescendant(origin: Instance, targetName: string, targetTag: string?): Instance?
-    local result = origin:FindFirstChild(targetName, true)
-    if result and targetTag then
-        result = if result:HasTag(targetTag) then result else nil
-    end
-    return result
+function GetDescendant(origin: Instance, filter: FilterOptions?): Instance?
+    local result = GetDescendants(origin, filter)
+    return result[1]
 end
 
 --[=[
     @within Waiter
-    Returns the first descendants of `origin` matching `targetNames` and `targetTag`.
+    Collects descendants with different `FilterOptions` in a table for easy access.
+    This is especially useful for collecting key instances in models or user interfaces.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
 ]=]--
-function GetDescendants(origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
+function CollectDescendants(origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
     local result = {}
-    for index, targetName in targetNames do
-        result[index] = GetDescendant(origin, targetName, targetTag)
+    for index, filter in filters do
+        result[index] = GetDescendant(origin, filter)
     end
     return result
 end
 
 --[=[
     @within Waiter
-    Returns the first ancestor of `origin` matching `targetNames` and `targetTag`.
+    Returns the ancestors of `origin` matching `filter`.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
+    @return {Instance?} -- The instances found (if any).
+]=]--
+function GetAncestors(origin: Instance, filter: FilterOptions?): {Instance?}
+    local ancestors = {}
+    local current = origin
+    repeat
+        current = current.Parent
+        table.insert(ancestors, current)
+    until current.Parent == game
+    local result = _Filter(ancestors, filter)
+    return result
+end
+
+--[=[
+    @within Waiter
+    Returns the first ancestor of `origin` matching `filter`.
+    @param origin Instance -- The instance to use as origin for the search.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
     @return Instance? -- The instance found (if any).
 ]=]--
-function GetAncestor(origin: Instance, targetName: string, targetTag: string?): Instance?
-    local result = origin:FindFirstAncestor(targetName)
-    if result and targetTag then
-        result = if result:HasTag(targetTag) then result else nil
-    end
-    return result
+function GetAncestor(origin: Instance, filter: FilterOptions?): Instance?
+    local result = GetAncestors(origin, filter)
+    return result[1]
 end
 
 --[=[
     @within Waiter
-    Returns the first ancestors of `origin` matching `targetNames` and `targetTag`.
+    Collects ancestors with different `FilterOptions` in a table for easy access.
+    This is especially useful for collecting key instances in models or user interfaces.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
 ]=]--
-function GetAncestors(origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
+function CollectAncestors(origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
     local result = {}
-    for index, targetName in targetNames do
-        result[index] = GetAncestor(origin, targetName, targetTag)
+    for index, filter in filters do
+        result[index] = GetAncestor(origin, filter)
     end
     return result
 end
 
 --[=[
     @within Waiter
-    Returns the first sibling of `origin` matching `targetNames` and `targetTag`.
+    Returns the siblings of `origin` matching `filter`.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
+    @return {Instance?} -- The instances found (if any).
+]=]--
+function GetSiblings(origin: Instance, filter: FilterOptions?): {Instance?}
+    local siblings = GetChildren(origin.Parent, filter)
+    return siblings
+end
+
+--[=[
+    @within Waiter
+    Returns the first sibling of `origin` matching `filter`.
+    @param origin Instance -- The instance to use as origin for the search.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
     @return Instance? -- The instance found (if any).
 ]=]--
-function GetSibling(origin: Instance, targetName: string, targetTag: string?): Instance?
-    local result = GetChild(origin.Parent, targetName, targetTag)
-    if result and targetTag then
-        result = if result:HasTag(targetTag) then result else nil
-    end
-    return result
+function GetSibling(origin: Instance, filter: FilterOptions?): Instance?
+    local result = GetSiblings(origin, filter)
+    return result[1]
 end
 
 --[=[
     @within Waiter
-    Returns the first siblings of `origin` matching `targetNames` and `targetTag`.
+    Collects siblings with different `FilterOptions` in a table for easy access.
+    This is especially useful for collecting key instances in models or user interfaces.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
 ]=]--
-function GetSiblings(origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
+function CollectSiblings(origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
     local result = {}
-    for index, targetName in targetNames do
-        result[index] = GetSibling(origin, targetName, targetTag)
+    for index, filter in filters do
+        result[index] = GetSibling(origin, filter)
     end
     return result
 end
 
 --[=[
     @within Waiter
-    Returns the first child of `origin` matching `targetNames` and `targetTag` found within `duration`.
+    Returns the first child of `origin` matching `filter` found within `duration`.
     @param duration number -- The amount of seconds to wait for the instance being searched for.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
     @return Instance? -- The instance found (if any).
 ]=]--
-function WaitForChild(duration: number, origin: Instance, targetName: string, targetTag: string?): Instance?
+function WaitForChild(duration: number, origin: Instance, filter: FilterOptions?): Instance?
     local startTime = os.time()
     local result = nil
     repeat
-        result = GetChild(origin, targetName, targetTag)
+        result = GetChild(origin, filter)
         task.wait()
     until os.time() - startTime > duration or result ~= nil
     return result
@@ -154,72 +234,33 @@ end
 
 --[=[
     @within Waiter
-    Returns the first children of `origin` matching `targetNames` and `targetTag` found within `duration`.
+    Returns the first children of `origin` matching `filters` found within `duration`.
     @param duration number -- The amount of seconds to wait for the instances being searched for.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
 ]=]--
-function WaitForChildren(duration: number, origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
+function WaitCollectChildren(duration: number, origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
     local result = {}
-    for index, targetName in targetNames do
-        result[index] = WaitForChild(duration, origin, targetName, targetTag)
+    for index, filter in filters do
+        result[index] = WaitForChild(duration, origin, filter)
     end
     return result
 end
 
 --[=[
     @within Waiter
-    Returns the first descendant of `origin` matching `targetNames` and `targetTag` found within `duration`.
+    Returns the first descendant of `origin` matching `filter` found within `duration`.
     @param duration number -- The amount of seconds to wait for the instance being searched for.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
     @return Instance? -- The instance found (if any).
 ]=]--
-function WaitForDescendant(duration: number, origin: Instance, targetName: string, targetTag: string?): Instance?
+function WaitForDescendant(duration: number, origin: Instance, filter: FilterOptions?): Instance?
     local startTime = os.time()
     local result = nil
     repeat
-        result = GetDescendant(origin, targetName, targetTag)
-        task.wait()
-    until os.time() - startTime > duration or result ~= nil
-    
-    return result
-end
-
---[=[
-    @within Waiter
-    Returns the first descendants of `origin` matching `targetNames` and `targetTag` found within `duration`.
-    @param duration number -- The amount of seconds to wait for the instances being searched for.
-    @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
-]=]--
-function WaitForDescendants(duration: number, origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
-    local result = {}
-    for index, targetName in targetNames do
-        result[index] = WaitForDescendant(duration, origin, targetName, targetTag)
-    end
-    return result
-end
-
---[=[
-    @within Waiter
-    Returns the first child of `sibling` matching `targetNames` and `targetTag` found within `duration`.
-    @param duration number -- The amount of seconds to wait for the instance being searched for.
-    @param origin Instance -- The instance to use as origin for the search.
-    @param targetName string -- The name of the instance being searched for.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return Instance? -- The instance found (if any).
-]=]--
-function WaitForSibling(duration: number, origin: Instance, targetName: string, targetTag: string?): Instance?
-    local startTime = os.time()
-    local result = nil
-    repeat
-        result = GetSibling(origin, targetName, targetTag)
+        result = GetDescendant(origin, filter)
         task.wait()
     until os.time() - startTime > duration or result ~= nil
     return result
@@ -227,36 +268,71 @@ end
 
 --[=[
     @within Waiter
-    Returns the first siblings of `origin` matching `targetNames` and `targetTag` found within `duration`.
+    Returns the first descendants of `origin` matching `filters` found within `duration`.
     @param duration number -- The amount of seconds to wait for the instances being searched for.
     @param origin Instance -- The instance to use as origin for the search.
-    @param targetNames {string: string} -- Dictionary of names to search for. The indices provided will be present in the returned table.
-    @param targetTag string? -- If present, only instances with this tag will be considered.
-    @return {string: Instance?} -- The instances found (if any).
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
 ]=]--
-function WaitForSiblings(duration: number, origin: Instance, targetNames: {string: string}, targetTag: string?): {string: Instance?}
+function WaitCollectDescendants(duration: number, origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
     local result = {}
-    for index, targetName in targetNames do
-        result[index] = WaitForSibling(duration, origin, targetName, targetTag)
+    for index, filter in filters do
+        result[index] = WaitForDescendant(duration, origin, filter)
+    end
+    return result
+end
+
+--[=[
+    @within Waiter
+    Returns the first sibling of `origin` matching `filter` found within `duration`.
+    @param duration number -- The amount of seconds to wait for the instance being searched for.
+    @param origin Instance -- The instance to use as origin for the search.
+    @param filter FilterOptions? -- If present, only instances that satisfy this filter will be considered.
+    @return Instance? -- The instance found (if any).
+]=]--
+function WaitForSibling(duration: number, origin: Instance, filter: FilterOptions?): Instance?
+    local startTime = os.time()
+    local result = nil
+    repeat
+        result = GetSibling(origin, filter)
+        task.wait()
+    until os.time() - startTime > duration or result ~= nil
+    return result
+end
+
+--[=[
+    @within Waiter
+    Returns the first siblings of `origin` matching `filters` found within `duration`.
+    @param duration number -- The amount of seconds to wait for the instances being searched for.
+    @param origin Instance -- The instance to use as origin for the search.
+    @param filters {string: FilterOptions} -- Dictionary of `FilterOptions`. Results returned using the same indices.
+    @return {string: Instance?} -- Dictionary of instances associated with their respective index in `filters`.
+]=]--
+function WaitCollectSiblings(duration: number, origin: Instance, filters: {string: FilterOptions}): {string: Instance?}
+    local result = {}
+    for index, filter in filters do
+        result[index] = WaitForSibling(duration, origin, filter)
     end
     return result
 end
 
 local module = {
-    GetChild           = GetChild,
-    GetChildren        = GetChildren,
-    GetDescendant      = GetDescendant,
-    GetDescendants     = GetDescendants,
-    GetAncestor        = GetAncestor,
-    GetAncestors       = GetAncestors,
-    GetSibling         = GetSibling,
-    GetSiblings        = GetSiblings,
-    WaitForChild       = WaitForChild,
-    WaitForChildren    = WaitForChildren,
-    WaitForDescendant  = WaitForDescendant,
-    WaitForDescendants = WaitForDescendants,
-    WaitForSibling     = WaitForSibling,
-    WaitForSiblings    = WaitForSiblings,
+    GetChild               = GetChild,
+    GetChildren            = GetChildren,
+    CollectChildren        = CollectChildren,
+    GetDescendant          = GetDescendant,
+    GetDescendants         = GetDescendants,
+    CollectDescendants     = GetDescendants,
+    GetAncestor            = GetAncestor,
+    GetAncestors           = GetAncestors,
+    CollectAncestors       = CollectAncestors,
+    GetSibling             = GetSibling,
+    GetSiblings            = GetSiblings,
+    CollectSiblings        = CollectSiblings,
+    WaitForChild           = WaitForChild,
+    WaitCollectChildren    = WaitCollectChildren,
+    WaitForDescendant      = WaitForDescendant,
+    WaitCollectDescendants = WaitCollectDescendants,
 }
 
 return module

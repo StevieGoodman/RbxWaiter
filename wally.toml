@@ -1,8 +1,9 @@
 [package]
 name = "steviegoodman/waiter"
-description = "Have your Roblox hierarchy instances served to you succinctly and safely!"
-version = "1.0.0"
+description = "Have your Roblox hierarchy instances served to you with convenience!"
+version = "2.0.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 [dependencies]
+TableUtil = "sleitnick/table-util@1.2.0"
