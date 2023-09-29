@@ -25,22 +25,22 @@ function _Filter(instances: {Instance}, filter: FilterOptions?): {Instance}
         return instances
     end
     instances = TABLE_UTIL.Filter(instances, function(instance)
-        if filter.Tag and not instance:HasTag(filter.Tag) then
-            return false
+        if filter.Tag and instance:HasTag(filter.Tag) then
+            return true
         end
-        if filter.ClassName and instance.ClassName ~= filter.ClassName then
-            return false
+        if filter.ClassName and instance.ClassName == filter.ClassName then
+            return true
         end
-        if filter.Name and instance.Name ~= filter.Name then
-            return false
+        if filter.Name and instance.Name == filter.Name then
+            return true
         end
         if filter.Attributes then
             for attributeName, attributeValue in filter.Attributes do
-                if instance:GetAttribute(attributeName) == attributeValue then continue end
-                return false
+                if instance:GetAttribute(attributeName) ~= attributeValue then continue end
+                return true
             end
         end
-        return true
+        return false
     end)
     return instances
 end
@@ -332,6 +332,7 @@ local module = {
     WaitCollectChildren    = WaitCollectChildren,
     WaitForDescendant      = WaitForDescendant,
     WaitCollectDescendants = WaitCollectDescendants,
+    WaitCollectSiblings    = WaitCollectSiblings,
 }
 
 return module
