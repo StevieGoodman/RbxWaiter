@@ -1,0 +1,43 @@
+local Custodian = require(script.Parent.Parent.Custodian)
+local Get = require(script.Parent.get)
+
+return function()
+    local level1 = game.Workspace.level1
+    local level2 = level1.level2
+    local level3 = level2.level3
+
+    describe("children()", function()
+        it("should return an custodian.option", function()
+            expect(Get.children(level1)).to.be.a("table")
+        end)
+        it("custodian.option should contain the children of origin", function()
+            local optionObj = Get.children(level1)
+            Custodian.option.isSomeThen(optionObj, function(children)
+                expect(#children).to.be.equal(2)
+                expect(children[1]).to.be.a("userdata")
+            end)
+            Custodian.option.isNoneThenCall(optionObj, error, "expected custodian.option.some, got custodian.option.none")
+        end)
+        it("should return custodian.option.none if no children are found", function()
+            local optionObj = Get.children(level3)
+            Custodian.option.isSomeThenCall(optionObj, error, "expected custodian.option.none, got custodian.option.some")
+        end)
+    end)
+
+    describe("child()", function()
+        it("should return an custodian.option", function()
+            expect(Get.child(level1)).to.be.a("table")
+        end)
+        itFOCUS("custodian.option should contain the child of origin", function()
+            local optionObj = Get.child(level1)
+            Custodian.option.isSomeThen(optionObj, function(child)
+                expect(child).to.be.a("userdata")
+            end)
+            Custodian.option.isNoneThenCall(optionObj, error, "expected custodian.option.some, got custodian.option.none")
+        end)
+        it("should return custodian.option.none if no child is found", function()
+            local optionObj = Get.child(level3)
+            Custodian.option.isSomeThenCall(optionObj, error, "expected custodian.option.none, got custodian.option.some")
+        end)
+    end)
+end

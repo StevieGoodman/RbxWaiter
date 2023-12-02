@@ -49,8 +49,13 @@ function result.switch(resultObj, switchTable)
 end
 
 function result.switchThen(resultObj, switchTable, ...)
-    result.isOkThen(resultObj, switchTable.ok, ...)
-    result.isErrThen(resultObj, switchTable.err, ...)
+    local value = nil
+    value = result.isOkThen(resultObj, switchTable.ok, ...)
+    if value then
+        return value
+    end
+    value = result.isErrThen(resultObj, switchTable.err, ...)
+    return value
 end
 
 function result.switchThenCall(resultObj, switchTable, ...)

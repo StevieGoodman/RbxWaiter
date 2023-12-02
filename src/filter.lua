@@ -3,7 +3,7 @@ local TableUtil = require(script.Parent.Parent.TableUtil)
 local filter = {}
 
 function filter.process(instances, filt)
-    if not filter then
+    if not filt then
         return instances
     end
     instances = TableUtil.Filter(instances, function(instance)

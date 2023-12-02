@@ -7,7 +7,10 @@
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
             "Packages": {
-                "$path": "Packages"
+                "$path": "Packages",
+                "Waiter": {
+                    "$path": "src"
+                }
             },
             "DevPackages": {
                 "$path": "DevPackages"
@@ -15,10 +18,7 @@
         },
         "ServerScriptService": {
             "$className": "ServerScriptService",
-
-            "Waiter": {
-                "$path": "src"
-            }
+            "$path": "ServerScriptService"
         }
     }
 }
