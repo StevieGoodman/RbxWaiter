@@ -7,19 +7,16 @@
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
             "Packages": {
-                "$path": "Packages",
-                "Packages": {
-                    "$path": "Packages"
-                },
-                "DevPackages": {
-                    "$path": "DevPackages"
-                }
+                "$path": "Packages"
+            },
+            "DevPackages": {
+                "$path": "DevPackages"
             }
         },
         "ServerScriptService": {
             "$className": "ServerScriptService",
 
-            "Custodian": {
+            "Waiter": {
                 "$path": "src"
             }
         }
