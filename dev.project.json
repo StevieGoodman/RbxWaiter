@@ -6,20 +6,21 @@
 
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
-
             "Packages": {
                 "$path": "Packages",
-
-                "Waiter": {
-                    "$path": "src"
+                "Packages": {
+                    "$path": "Packages"
+                },
+                "DevPackages": {
+                    "$path": "DevPackages"
                 }
             }
         },
         "ServerScriptService": {
             "$className": "ServerScriptService",
 
-            "Tests": {
-                "$path": "ServerScriptService/tests.server.lua"
+            "Custodian": {
+                "$path": "src"
             }
         }
     }
