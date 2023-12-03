@@ -16,10 +16,10 @@ end
 
 function get.child(origin, filter)
     local optionObj = get.children(origin, filter)
-    Custodian.option.isSomeThen(optionObj, function(children)
+    local result = Custodian.option.isSomeThen(optionObj, function(children)
         return children[1]
     end)
-    return Custodian.option.none()
+    return Custodian.option.new(result)
 end
 
 function get.descendants(origin, filter)
@@ -35,19 +35,19 @@ end
 
 function get.descendant(origin, filter)
     local optionObj = get.descendants(origin, filter)
-    Custodian.option.isSomeThen(optionObj, function(descendants)
+    local result = Custodian.option.isSomeThen(optionObj, function(descendants)
         return descendants[1]
     end)
-    return Custodian.option.none()
+    return Custodian.option.new(result)
 end
 
 function get.ancestors(origin, filter)
     local ancestors = {}
     local current = origin
-    repeat
+    while current.Parent ~= game do
         current = current.Parent
         table.insert(ancestors, current)
-    until current.Parent == game
+    end
     ancestors = Filter.process(ancestors, filter)
     if #ancestors == 0 then
         return Custodian.option.none()
@@ -59,14 +59,19 @@ end
 
 function get.ancestor(origin, filter)
     local optionObj = get.ancestors(origin, filter)
-    Custodian.option.isSomeThen(optionObj, function(ancestors)
+    local result = Custodian.option.isSomeThen(optionObj, function(ancestors)
         return ancestors[1]
     end)
-    return Custodian.option.none()
+    return Custodian.option.new(result)
 end
 
 function get.siblings(origin, filter)
-    local siblings = get.children(origin.Parent, filter)
+    local optionObj = get.children(origin.Parent, filter)
+    local siblings = Custodian.option.isSomeThen(optionObj, function(children)
+        local index = table.find(children, origin)
+        table.remove(children, index)
+        return children
+    end)
     if #siblings == 0 then
         return Custodian.option.none()
     else
@@ -76,10 +81,10 @@ end
 
 function get.sibling(origin, filter)
     local optionObj = get.siblings(origin, filter)
-    Custodian.option.isSomeThen(optionObj, function(siblings)
+    local result = Custodian.option.isSomeThen(optionObj, function(siblings)
         return siblings[1]
     end)
-    return Custodian.option.none()
+    return Custodian.option.new(result)
 end
 
 return get
