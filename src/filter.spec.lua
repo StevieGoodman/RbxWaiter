@@ -1,4 +1,3 @@
-local Custodian = require(script.Parent.Parent.Custodian)
 local Filter = require(script.Parent.filter)
 
 return function()
