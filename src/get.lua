@@ -67,16 +67,17 @@ end
 
 function get.siblings(origin, filter)
     local optionObj = get.children(origin.Parent, filter)
-    local siblings = Custodian.option.isSomeThen(optionObj, function(children)
+    local result = Custodian.option.isSomeThen(optionObj, function(children)
         local index = table.find(children, origin)
-        table.remove(children, index)
-        return children
+        if index then
+            table.remove(children, index)
+            if #children == 0 then
+                children = nil
+            end
+        end
+        return Custodian.option.new(children)
     end)
-    if #siblings == 0 then
-        return Custodian.option.none()
-    else
-        return Custodian.option.new(siblings)
-    end
+    return result or Custodian.option.none()
 end
 
 function get.sibling(origin, filter)

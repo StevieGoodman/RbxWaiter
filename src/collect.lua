@@ -1,4 +1,4 @@
-local Option, Result = table.unpack(require(script.Parent.Parent.Custodian))
+local Custodian = require(script.Parent.Parent.Custodian)
 local Get = require(script.Parent.get)
 
 local collect = {}
@@ -7,15 +7,15 @@ function collect._process(origin, filters, getFn, relationName)
     local results = {}
     for index, filter in filters do
         local optionObj = getFn(origin, filter)
-        if Option.isNone(optionObj) then
-            return Result.err(`Unable to collect all {relationName}! Origin: {origin:GetFullName()}, filter: {filter}`)
+        if Custodian.option.isNone(optionObj) then
+            return Custodian.result.err(`Unable to collect all {relationName}! Origin: {origin:GetFullName()}, filter: {filter}`)
         else
-            Option.isSomeThen(optionObj, function(instance)
+            Custodian.option.isSomeThen(optionObj, function(instance)
                 results[index] = instance
             end)
         end
     end
-    return Result.ok(results)
+    return Custodian.result.ok(results)
 end
 
 function collect.children(origin, filters)
@@ -31,7 +31,7 @@ function collect.ancestors(origin, filters)
 end
 
 function collect.siblings(origin, filters)
-    return collect._process(origin, filters, Get.siblings, "siblings")
+    return collect._process(origin, filters, Get.sibling, "siblings")
 end
 
 return collect
