@@ -9,4 +9,5 @@ TestEZ.TestBootstrap:run({
     Waiter["filter.spec"],
     Waiter["collect.spec"],
     Waiter["waitFor.spec"],
+    Waiter["waitCollect.spec"],
 })
