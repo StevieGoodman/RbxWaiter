@@ -1,6 +1,13 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Waiter = require(ReplicatedStorage.Packages.Waiter)
 
-assert(Waiter.GetChild(script.Parent) == script)
-assert(Waiter.GetChild(script.Parent, { Name = "Tests" }) == script)
-assert(Waiter.GetChild(script.Parent, { Name = "Hi" }) == nil)
+local TestEZ = require(ReplicatedStorage.DevPackages.TestEZ)
+
+local Waiter = ReplicatedStorage.Packages.Waiter
+
+TestEZ.TestBootstrap:run({
+    Waiter["get.spec"],
+    Waiter["filter.spec"],
+    Waiter["collect.spec"],
+    Waiter["waitFor.spec"],
+    Waiter["waitCollect.spec"],
+})

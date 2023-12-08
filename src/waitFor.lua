@@ -1,36 +1,28 @@
-local Option, _ = table.unpack(require(script.Parent.Parent.Custodian))
+local Custodian = require(script.Parent.Parent.Custodian)
 local Get = require(script.Parent.get)
 
 local waitFor = {}
 
-function waitFor.child(duration, origin, filter)
+function waitFor._process(duration, origin, filter, getFn)
     local startTime = os.time()
-    local child = nil
+    local optionObj = nil
     repeat
-        child = Get.child(origin, filter)
+        optionObj = getFn(origin, filter)
         task.wait()
-    until os.time() - startTime > duration or Option.isSome(child)
-    return Option.new(child)
+    until os.time() - startTime > duration or Custodian.option.isSome(optionObj)
+    return Custodian.option.new(optionObj.value)
+end
+
+function waitFor.child(duration, origin, filter)
+    return waitFor._process(duration, origin, filter, Get.child)
 end
 
 function waitFor.descendant(duration, origin, filter)
-    local startTime = os.time()
-    local descendant = nil
-    repeat
-        descendant = Get.descendant(origin, filter)
-        task.wait()
-    until os.time() - startTime > duration or Option.isSome(descendant)
-    return Option.new(descendant)
+    return waitFor._process(duration, origin, filter, Get.descendant)
 end
 
 function waitFor.sibling(duration, origin, filter)
-    local startTime = os.time()
-    local sibling = nil
-    repeat
-        sibling = Get.sibling(origin, filter)
-        task.wait()
-    until os.time() - startTime > duration or Option.isSome(sibling)
-    return Option.new(sibling)
+    return waitFor._process(duration, origin, filter, Get.sibling)
 end
 
 return waitFor

@@ -69,6 +69,44 @@ return function()
         end)
     end)
 
+    describe("isErrThen()", function()
+        it("should not call the passed callback when passed an Result.ok", function()
+            local called = false
+            Result.isErrThen(okResult, function()
+                called = true
+            end)
+            expect(called).to.be.equal(false)
+        end)
+        it("should call the passed callback when passed an Result.err", function()
+            local called = false
+            Result.isErrThen(errResult, function()
+                called = true
+            end)
+            expect(called).to.be.equal(true)
+        end)
+        it("should not pass the wrapped value into the passed callback when passed an Result.ok", function()
+            local value = "no value"
+            Result.isErrThen(okResult, function(val)
+                value = val
+            end)
+            expect(value).to.be.equal("no value")
+        end)
+        it("should pass the wrapped value into the passed callback when passed an Result.err", function()
+            local value = "no value"
+            Result.isErrThen(errResult, function(val)
+                value = val
+            end)
+            expect(value).to.be.equal("err")
+        end)
+        it("should pass in extra arguments into the passed callback", function()
+            local string = "no value"
+            Result.isErrThen(errResult, function(_, arg1, arg2, arg3)
+                string = `{tostring(arg1)} {arg2} {tostring(arg3)}`
+            end, 1, "hello", true)
+            expect(string).to.be.equal("1 hello true")
+        end)
+    end)
+
     describe("isOkThenCall()", function()
         it("should call the passed callback when passed an Result.ok", function()
             local called = false
@@ -130,6 +168,40 @@ return function()
         it("should return the none key's value when passed an Result.err", function()
             local value = Result.switch(errResult, switchTable)
             expect(value).to.be.equal("err")
+        end)
+    end)
+
+    describe("switchThen()", function()
+        local switchTable = {
+            ok = function(arg1, arg2, arg3)
+                if arg1 and arg2 and arg3 then
+                    return "args"
+                else
+                    return "ok"
+                end
+            end,
+            err = function(arg1, arg2, arg3)
+                if arg1 and arg2 and arg3 then
+                    return "args"
+                else
+                    return "err"
+                end
+            end,
+        }
+
+        it("should return the ok key's returned value when passed an Result.ok", function()
+            local value = Result.switchThen(okResult, switchTable)
+            expect(value).to.be.equal("ok")
+        end)
+        it("should return the err key's returned value when passed an Result.err", function()
+            local value = Result.switchThen(errResult, switchTable)
+            expect(value).to.be.equal("err")
+        end)
+        it("should pass extra arguments into the passed callbacks", function()
+            local okValue = Result.switchThen(okResult, switchTable, 1, "hello", true)
+            local errValue = Result.switchThen(errResult, switchTable, 1, "hello", true)
+            expect(okValue).to.be.equal("args")
+            expect(errValue).to.be.equal("args")
         end)
     end)
 
