@@ -1,28 +1,30 @@
-local Custodian = require(script.Parent.Parent.Custodian)
 local Get = require(script.Parent.get)
 
 local waitFor = {}
 
-function waitFor._process(duration, origin, filter, getFn)
+function waitFor._process(origin, filter, getFunc, duration)
+    if not duration then
+        duration = 1
+    end
     local startTime = os.time()
-    local optionObj = nil
+    local result = nil
     repeat
-        optionObj = getFn(origin, filter)
+        result = getFunc(origin, filter)
         task.wait()
-    until os.time() - startTime > duration or Custodian.option.isSome(optionObj)
-    return Custodian.option.new(optionObj.value)
+    until os.time() - startTime > duration or result
+    return result
 end
 
-function waitFor.child(duration, origin, filter)
-    return waitFor._process(duration, origin, filter, Get.child)
+function waitFor.child(origin, filter, duration)
+    return waitFor._process(origin, filter, Get.child, duration)
 end
 
-function waitFor.descendant(duration, origin, filter)
-    return waitFor._process(duration, origin, filter, Get.descendant)
+function waitFor.descendant(origin, filter, duration)
+    return waitFor._process(origin, filter, Get.descendant, duration)
 end
 
-function waitFor.sibling(duration, origin, filter)
-    return waitFor._process(duration, origin, filter, Get.sibling)
+function waitFor.sibling(origin, filter, duration)
+    return waitFor._process(origin, filter, Get.sibling, duration)
 end
 
 return waitFor
