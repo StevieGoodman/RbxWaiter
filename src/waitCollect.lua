@@ -1,33 +1,30 @@
-local Custodian = require(script.Parent.Parent.Custodian)
 local WaitFor = require(script.Parent.waitFor)
 
 local waitCollect = {}
 
-function waitCollect._process(duration, origin, filters, getFn, relationName)
+function waitCollect._process(origin, filters, waitCollectFunc, relationName, duration)
     local results = {}
     for index, filter in filters do
-        local optionObj = getFn(duration, origin, filter)
-        if Custodian.option.isNone(optionObj) then
-            return Custodian.result.err(`Unable to collect all {relationName}! Origin: {origin:GetFullName()}, filter: {filter}`)
+        local result = waitCollectFunc(origin, filter, duration)
+        if result then
+            results[index] = result
         else
-            Custodian.option.isSomeThen(optionObj, function(instance)
-                results[index] = instance
-            end)
+            error(`Unable to collect all {relationName}!\nOrigin: {origin:GetFullName()}\nFilter Name: {filter.Name}\nFilter Class: {filter.ClassName}`)
         end
     end
-    return Custodian.result.ok(results)
+    return results
 end
 
-function waitCollect.children(duration, origin, filters)
-    return waitCollect._process(duration, origin, filters, WaitFor.child, "children")
+function waitCollect.children(origin, filters, duration)
+    return waitCollect._process(origin, filters, WaitFor.child, "children", duration)
 end
 
-function waitCollect.descendants(duration, origin, filters)
-    return waitCollect._process(duration, origin, filters, WaitFor.descendant, "descendants")
+function waitCollect.descendants(origin, filters, duration)
+    return waitCollect._process(origin, filters, WaitFor.descendant, "descendants", duration)
 end
 
-function waitCollect.siblings(duration, origin, filters)
-    return waitCollect._process(duration, origin, filters, WaitFor.sibling, "siblings")
+function waitCollect.siblings(origin, filters, duration)
+    return waitCollect._process(origin, filters, WaitFor.sibling, "siblings", duration)
 end
 
 return waitCollect
