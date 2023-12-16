@@ -15,37 +15,37 @@ return function()
 
         it("should filter by name", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, {Name = "level2"})
+            local filteredList = Filter.process(list, {name = "level2"})
             expect(filteredList[1]).to.be.equal(level2)
         end)
 
-        it("should filter by ClassName", function()
+        it("should filter by classname", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, {ClassName = "Folder"})
+            local filteredList = Filter.process(list, {className = "Folder"})
             expect(filteredList[1]).to.be.equal(level1)
         end)
 
-        it("should filter by Tag", function()
+        it("should filter by tag", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, {Tag = "level1"})
+            local filteredList = Filter.process(list, {tag = "level1"})
             expect(filteredList[1]).to.be.equal(level1)
         end)
 
-        it("should filter by ClassName and Tag", function()
+        it("should filter by classname and tag", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, {ClassName = "Folder", Tag = "level1"})
+            local filteredList = Filter.process(list, {className = "Folder", tag = "level1"})
             expect(filteredList[1]).to.be.equal(level1)
         end)
 
-        it("should filter by ClassName and Name", function()
+        it("should filter by classname and name", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, {ClassName = "Model", Name = "level2"})
+            local filteredList = Filter.process(list, {className = "Model", name = "level2"})
             expect(filteredList[1]).to.be.equal(level2)
         end)
 
-        it("should filter by Tag and Name", function()
+        it("should filter by tag and name", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, {Tag = "level2", Name = "level2"})
+            local filteredList = Filter.process(list, {tag = "level2", name = "level2"})
             expect(filteredList[1]).to.be.equal(level2)
         end)
     end)

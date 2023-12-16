@@ -9,8 +9,8 @@ return function()
     describe("children()", function()
         it("should return a userdata if the children are found", function()
             local filters = {
-                level2 = {Name = "level2"},
-                other = {Name = "other"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
             }
             local table = Collect.children(level1, filters)
             expect(table.level2).to.be.equal(level2)
@@ -18,9 +18,9 @@ return function()
         end)
         it("should error if any child is not found", function()
             local filters = {
-                level2 = {Name = "level2"},
-                other = {Name = "other"},
-                level3 = {Name = "level3"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level3 = {name = "level3"},
             }
             expect(function()
                 Collect.children(level1, filters)
@@ -31,9 +31,9 @@ return function()
     describe("descendants()", function()
         it("should return a userdata if the descendants are found", function()
             local filters = {
-                level2 = {Name = "level2"},
-                other = {Name = "other"},
-                level3 = {Name = "level3"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level3 = {name = "level3"},
             }
             local table = Collect.descendants(level1, filters)
             expect(table.level2).to.be.equal(level2)
@@ -42,9 +42,9 @@ return function()
         end)
         it("should error if any descendant is not found", function()
             local filters = {
-                level2 = {Name = "level2"},
-                other = {Name = "other"},
-                level4 = {Name = "level4"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level4 = {name = "level4"},
             }
             expect(function()
                 Collect.descendants(level1, filters)
@@ -55,8 +55,8 @@ return function()
     describe("ancestors()", function()
         it("should return a userdata if the ancestors are found", function()
             local filters = {
-                level1 = {Name = "level1"},
-                workspace = {Name = "Workspace"},
+                level1 = {name = "level1"},
+                workspace = {name = "Workspace"},
             }
             local table = Collect.ancestors(level3, filters)
             expect(table.level1).to.be.equal(level1)
@@ -64,9 +64,9 @@ return function()
         end)
         it("should error if any ancestor is not found", function()
             local filters = {
-                level1 = {Name = "level1"},
-                workspace = {Name = "Workspace"},
-                game = {Name = "game"},
+                level1 = {name = "level1"},
+                workspace = {name = "Workspace"},
+                game = {name = "game"},
             }
             expect(function()
                 Collect.ancestors(level3, filters)
@@ -77,16 +77,16 @@ return function()
     describe("siblings()", function()
         it("should return a userdata if the siblings are found", function()
             local filters = {
-                other = {Name = "other"},
+                other = {name = "other"},
             }
             local table = Collect.siblings(level2, filters)
             expect(table.other).to.be.equal(otherLevel2)
         end)
         it("should error if any sibling is not found", function()
             local filters = {
-                level2 = {Name = "level2"},
-                other = {Name = "other"},
-                level4 = {Name = "level4"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level4 = {name = "level4"},
             }
             expect(function()
                 Collect.siblings(level3, filters)

@@ -9,14 +9,14 @@ return function()
     describe("children()", function()
         it("should return a table of userdata if the children are found", function()
             local filter = {
-                level2 = { Name = "level2" }
+                level2 = { name = "level2" }
             }
             local result = WaitCollect.children(level1, filter)
             expect(result.level2).to.be.equal(level2)
         end)
         it("should error if the children are not found", function()
             local filter = {
-                level4 = { Name = "level4" }
+                level4 = { name = "level4" }
             }
             expect(function()
                 WaitCollect.children(level1, filter)
@@ -27,14 +27,14 @@ return function()
     describe("descendants()", function()
         it("should return a table of userdata if the descendants are found", function()
             local filter = {
-                level3 = { Name = "level3" }
+                level3 = { name = "level3" }
             }
             local result = WaitCollect.descendants(level1, filter)
             expect(result.level3).to.be.equal(level3)
         end)
         it("should error if the descendants are not found", function()
             local filter = {
-                level4 = { Name = "level4" }
+                level4 = { name = "level4" }
             }
             expect(function()
                 WaitCollect.descendants(level1, filter)
@@ -45,14 +45,14 @@ return function()
     describe("siblings()", function()
         it("should return a table of userdata if the siblings are found", function()
             local filter = {
-                other = { Name = "other" }
+                other = { name = "other" }
             }
             local result = WaitCollect.siblings(level2, filter)
             expect(result.other).to.be.equal(otherLevel2)
         end)
         it("should error if the siblings are not found", function()
             local filter = {
-                level4 = { Name = "level4" }
+                level4 = { name = "level4" }
             }
             expect(function()
                 WaitCollect.siblings(level2, filter)

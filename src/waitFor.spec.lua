@@ -8,12 +8,12 @@ return function()
 
     describe("child()", function()
         it("should return a userdata if the child is found", function()
-            local filter = {Name = "level2"}
+            local filter = {name = "level2"}
             local result = WaitFor.child(level1, filter)
             expect(result).to.be.equal(level2)
         end)
         it("should return nil if the child is not found", function()
-            local filter = {Name = "level4"}
+            local filter = {name = "level4"}
             local result = WaitFor.child(level1, filter)
             expect(result).to.be.equal(nil)
         end)
@@ -21,12 +21,12 @@ return function()
 
     describe("descendant()", function()
         it("should return a userdata if the descendant is found", function()
-            local filter = {Name = "level3"}
+            local filter = {name = "level3"}
             local result = WaitFor.descendant(level1, filter)
             expect(result).to.be.equal(level3)
         end)
         it("should return nil if the descendant is not found", function()
-            local filter = {Name = "level4"}
+            local filter = {name = "level4"}
             local result = WaitFor.descendant(level1, filter)
             expect(result).to.be.equal(nil)
         end)
@@ -34,12 +34,12 @@ return function()
 
     describe("sibling()", function()
         it("should return a userdata if the sibling is found", function()
-            local filter = {Name = "other"}
+            local filter = {name = "other"}
             local result = WaitFor.sibling(level2, filter)
             expect(result).to.be.equal(otherLevel2)
         end)
         it("should return nil if the sibling is not found", function()
-            local filter = {Name = "level4"}
+            local filter = {name = "level4"}
             local result = WaitFor.sibling(level2, filter)
             expect(result).to.be.equal(nil)
         end)
