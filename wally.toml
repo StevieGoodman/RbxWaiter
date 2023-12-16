@@ -1,11 +1,21 @@
 [package]
 name = "steviegoodman/waiter"
 description = "Have your Roblox hierarchy instances served to you with convenience!"
-version = "2.0.10"
+version = "3.0.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 exclude = ["**"]
-include = ["src", "src/*", "default.project.json", "wally.toml"]
+include = [
+    "src",
+    "src/init.lua",
+    "src/filter.lua",
+    "src/get.lua",
+    "src/collect.lua",
+    "src/waitFor.lua",
+    "src/waitCollect.lua",
+    "default.project.json", 
+    "wally.toml"
+]
 
 [dependencies]
 TableUtil = "sleitnick/table-util@1.2.0"
