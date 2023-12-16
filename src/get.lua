@@ -46,7 +46,11 @@ function get.siblings(origin, filter)
         return {}
     else
         local siblings = get._process(origin.Parent, filter, origin.Parent.GetChildren)
-        table.remove(siblings, table.find(siblings, origin))
+        -- Removes the origin from the siblings if applicable
+        local originIndex = table.find(siblings, origin)
+        if originIndex then
+            table.remove(siblings, originIndex)
+        end
         return siblings
     end
 end
