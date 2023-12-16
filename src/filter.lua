@@ -7,22 +7,23 @@ function filter.process(instances, filt)
         return instances
     end
     instances = TableUtil.Filter(instances, function(instance)
-        if filt.tag and instance:HasTag(filt.tag) then
-            return true
+        if filt.tag and not instance:HasTag(filt.tag) then
+            return false
         end
-        if filt.className and instance.ClassName == filt.className then
-            return true
+        if filt.className and instance.ClassName ~= filt.className then
+            return false
         end
-        if filt.name and instance.Name == filt.name then
-            return true
+        if filt.name and instance.Name ~= filt.name then
+            return false
         end
         if filt.attributes then
             for attributeName, attributeValue in filt.attributes do
-                if instance:GetAttribute(attributeName) ~= attributeValue then continue end
-                return true
+                if instance:GetAttribute(attributeName) ~= attributeValue then
+                    return false
+                end
             end
         end
-        return false
+        return true
     end)
     return instances
 end
