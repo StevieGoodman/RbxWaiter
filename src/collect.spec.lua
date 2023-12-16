@@ -1,4 +1,3 @@
-local Custodian = require(script.Parent.Parent.Custodian)
 local Collect = require(script.Parent.collect)
 
 return function()
@@ -8,104 +7,90 @@ return function()
     local level3 = level2.level3
 
     describe("children()", function()
-        it("should return a custodian.result.error if any child is not found", function()
+        it("should return a userdata if the children are found", function()
             local filters = {
-                {Name = "level2"},
-                {Name = "level3"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
             }
-            local result = Collect.children(level1, filters)
-            expect(Custodian.result.isErr(result)).to.be.equal(true)
+            local table = Collect.children(level1, filters)
+            expect(table.level2).to.be.equal(level2)
+            expect(table.other).to.be.equal(otherLevel2)
         end)
-
-        it("should return a list of children that match a filter", function()
+        it("should error if any child is not found", function()
             local filters = {
-                {Name = "level2"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level3 = {name = "level3"},
             }
-            local result = Collect.children(level1, filters)
-            local pass = false
-            Custodian.result.isOkThen(result, function(list)
-                expect(list[1]).to.be.equal(level2)
-                pass = true
-            end)
-            expect(pass).to.be.equal(true)
+            expect(function()
+                Collect.children(level1, filters)
+            end).to.throw()
         end)
     end)
 
     describe("descendants()", function()
-        it("should return a custodian.result.err if any descendant is not found", function()
+        it("should return a userdata if the descendants are found", function()
             local filters = {
-                {Name = "level2"},
-                {Name = "level4"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level3 = {name = "level3"},
             }
-            local result = Collect.descendants(level1, filters)
-            expect(Custodian.result.isErr(result)).to.be.equal(true)
+            local table = Collect.descendants(level1, filters)
+            expect(table.level2).to.be.equal(level2)
+            expect(table.other).to.be.equal(otherLevel2)
+            expect(table.level3).to.be.equal(level3)
         end)
-
-        it("should return a list of descendants that match a filter", function()
+        it("should error if any descendant is not found", function()
             local filters = {
-                {Name = "level2"},
-                {Name = "other"},
-                {Name = "level3"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level4 = {name = "level4"},
             }
-            local result = Collect.descendants(level1, filters)
-            local pass = false
-            Custodian.result.isOkThen(result, function(list)
-                expect(list[1]).to.be.equal(level2)
-                expect(list[2]).to.be.equal(otherLevel2)
-                expect(list[3]).to.be.equal(level3)
-                pass = true
-            end)
-            expect(pass).to.be.equal(true)
+            expect(function()
+                Collect.descendants(level1, filters)
+            end).to.throw()
         end)
     end)
 
     describe("ancestors()", function()
-        it("should return a custodian.result.err if any ancestor is not found", function()
+        it("should return a userdata if the ancestors are found", function()
             local filters = {
-                {Name = "level1"},
-                {Name = "level4"},
+                level1 = {name = "level1"},
+                workspace = {name = "Workspace"},
             }
-            local result = Collect.ancestors(level3, filters)
-            expect(Custodian.result.isErr(result)).to.be.equal(true)
+            local table = Collect.ancestors(level3, filters)
+            expect(table.level1).to.be.equal(level1)
+            expect(table.workspace).to.be.equal(game.Workspace)
         end)
-
-        it("should return a list of ancestors that match a filter", function()
+        it("should error if any ancestor is not found", function()
             local filters = {
-                {Name = "level1"},
-                {Name = "level2"},
+                level1 = {name = "level1"},
+                workspace = {name = "Workspace"},
+                game = {name = "game"},
             }
-            local result = Collect.ancestors(level3, filters)
-            local pass = false
-            Custodian.result.isOkThen(result, function(list)
-                expect(list[1]).to.be.equal(level1)
-                expect(list[2]).to.be.equal(level2)
-                pass = true
-            end)
-            expect(pass).to.be.equal(true)
+            expect(function()
+                Collect.ancestors(level3, filters)
+            end).to.throw()
         end)
     end)
 
     describe("siblings()", function()
-        it("should return a custodian.result.err if any sibling is not found", function()
+        it("should return a userdata if the siblings are found", function()
             local filters = {
-                {Name = "level2"},
-                {Name = "level4"},
+                other = {name = "other"},
             }
-            local result = Collect.siblings(level3, filters)
-            expect(Custodian.result.isErr(result)).to.be.equal(true)
+            local table = Collect.siblings(level2, filters)
+            expect(table.other).to.be.equal(otherLevel2)
         end)
-
-        it("should return a list of siblings that match a filter", function()
+        it("should error if any sibling is not found", function()
             local filters = {
-                {Name = "other"},
+                level2 = {name = "level2"},
+                other = {name = "other"},
+                level4 = {name = "level4"},
             }
-            local result = Collect.siblings(level2, filters)
-            local pass = false
-            Custodian.result.isOkThen(result, function(list)
-                expect(list[1]).to.be.equal(otherLevel2)
-                pass = true
-            end)
-            expect(pass).to.be.equal(true)
+            expect(function()
+                Collect.siblings(level3, filters)
+            end).to.throw()
         end)
     end)
 

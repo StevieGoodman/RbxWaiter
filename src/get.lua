@@ -1,44 +1,28 @@
-local Custodian = require(script.Parent.Parent.Custodian)
 local Filter = require(script.Parent.filter)
 
 local get = {}
 
+function get._process(origin, filter, getFunc)
+    local results = getFunc(origin)
+    return Filter.process(results, filter)
+end
+
 function get.children(origin, filter)
-    local children = origin:GetChildren()
-    children = Filter.process(children, filter)
-    if #children == 0 then
-        return Custodian.option.none()
-    else
-        return Custodian.option.new(children)
-    end
-    return children
+    return get._process(origin, filter, origin.GetChildren)
 end
 
 function get.child(origin, filter)
-    local optionObj = get.children(origin, filter)
-    local result = Custodian.option.isSomeThen(optionObj, function(children)
-        return children[1]
-    end)
-    return Custodian.option.new(result)
+    local children = get.children(origin, filter)
+    return children[1]
 end
 
 function get.descendants(origin, filter)
-    local descendants = origin:GetDescendants()
-    descendants = Filter.process(descendants, filter)
-    if #descendants == 0 then
-        return Custodian.option.none()
-    else
-        return Custodian.option.new(descendants)
-    end
-    return descendants
+    return get._process(origin, filter, origin.GetDescendants)
 end
 
 function get.descendant(origin, filter)
-    local optionObj = get.descendants(origin, filter)
-    local result = Custodian.option.isSomeThen(optionObj, function(descendants)
-        return descendants[1]
-    end)
-    return Custodian.option.new(result)
+    local descendants = get.descendants(origin, filter)
+    return descendants[1]
 end
 
 function get.ancestors(origin, filter)
@@ -48,44 +32,32 @@ function get.ancestors(origin, filter)
         current = current.Parent
         table.insert(ancestors, current)
     end
-    ancestors = Filter.process(ancestors, filter)
-    if #ancestors == 0 then
-        return Custodian.option.none()
-    else
-        return Custodian.option.new(ancestors)
-    end
-    return ancestors
+    return Filter.process(ancestors, filter)
 end
 
 function get.ancestor(origin, filter)
-    local optionObj = get.ancestors(origin, filter)
-    local result = Custodian.option.isSomeThen(optionObj, function(ancestors)
-        return ancestors[1]
-    end)
-    return Custodian.option.new(result)
+    local ancestors = get.ancestors(origin, filter)
+    return ancestors[1]
 end
 
 function get.siblings(origin, filter)
-    local optionObj = get.children(origin.Parent, filter)
-    local result = Custodian.option.isSomeThen(optionObj, function(children)
-        local index = table.find(children, origin)
-        if index then
-            table.remove(children, index)
-            if #children == 0 then
-                children = nil
-            end
+    -- Prevents attempting to index game's parent
+    if origin == game then
+        return {}
+    else
+        local siblings = get._process(origin.Parent, filter, origin.Parent.GetChildren)
+        -- Removes the origin from the siblings if applicable
+        local originIndex = table.find(siblings, origin)
+        if originIndex then
+            table.remove(siblings, originIndex)
         end
-        return Custodian.option.new(children)
-    end)
-    return result or Custodian.option.none()
+        return siblings
+    end
 end
 
 function get.sibling(origin, filter)
-    local optionObj = get.siblings(origin, filter)
-    local result = Custodian.option.isSomeThen(optionObj, function(siblings)
-        return siblings[1]
-    end)
-    return Custodian.option.new(result)
+    local siblings = get.siblings(origin, filter)
+    return siblings[1]
 end
 
 return get
