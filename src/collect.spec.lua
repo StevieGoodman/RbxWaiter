@@ -7,90 +7,66 @@ return function()
     local level3 = level2.level3
 
     describe("children()", function()
-        it("should return a userdata if the children are found", function()
-            local filters = {
-                level2 = {name = "level2"},
-                other = {name = "other"},
+        it("should return the correct types depending on result for each tag", function()
+            local tags = {
+                level1 = "level1",
+                level2 = "level2",
+                level4 = "level4",
             }
-            local table = Collect.children(level1, filters)
-            expect(table.level2).to.be.equal(level2)
-            expect(table.other).to.be.equal(otherLevel2)
-        end)
-        it("should error if any child is not found", function()
-            local filters = {
-                level2 = {name = "level2"},
-                other = {name = "other"},
-                level3 = {name = "level3"},
-            }
-            expect(function()
-                Collect.children(level1, filters)
-            end).to.throw()
+            local table = Collect.children(workspace, tags)
+            expect(table.level1).to.be.equal(level1)
+            expect(#table.level2).to.be.equal(0)
+            expect(#table.level4).to.be.equal(0)
+            table = Collect.children(level1, tags)
+            expect(#table.level1).to.be.equal(0)
+            expect(#table.level2).to.be.equal(2)
+            expect(#table.level4).to.be.equal(0)
         end)
     end)
 
     describe("descendants()", function()
-        it("should return a userdata if the descendants are found", function()
+        it("should return the correct types depending on result for each tag", function()
             local filters = {
-                level2 = {name = "level2"},
-                other = {name = "other"},
-                level3 = {name = "level3"},
+                level2 = "level2",
+                child = "child",
+                level3 = "level3",
+                level4 = "level4",
             }
             local table = Collect.descendants(level1, filters)
-            expect(table.level2).to.be.equal(level2)
-            expect(table.other).to.be.equal(otherLevel2)
+            expect(#table.level2).to.be.equal(2)
+            expect(#table.child).to.be.equal(3)
             expect(table.level3).to.be.equal(level3)
-        end)
-        it("should error if any descendant is not found", function()
-            local filters = {
-                level2 = {name = "level2"},
-                other = {name = "other"},
-                level4 = {name = "level4"},
-            }
-            expect(function()
-                Collect.descendants(level1, filters)
-            end).to.throw()
+            expect(#table.level4).to.be.equal(0)
         end)
     end)
 
     describe("ancestors()", function()
-        it("should return a userdata if the ancestors are found", function()
+        it("should return the correct types depending on result for each tag", function()
             local filters = {
-                level1 = {name = "level1"},
-                workspace = {name = "Workspace"},
+                level1 = "level1",
+                level2 = "level2",
+                level3 = "level3",
+                level4 = "level4",
             }
             local table = Collect.ancestors(level3, filters)
             expect(table.level1).to.be.equal(level1)
-            expect(table.workspace).to.be.equal(game.Workspace)
-        end)
-        it("should error if any ancestor is not found", function()
-            local filters = {
-                level1 = {name = "level1"},
-                workspace = {name = "Workspace"},
-                game = {name = "game"},
-            }
-            expect(function()
-                Collect.ancestors(level3, filters)
-            end).to.throw()
+            expect(table.level2).to.be.equal(level2)
+            expect(#table.level3).to.be.equal(0)
+            expect(#table.level4).to.be.equal(0)
         end)
     end)
 
     describe("siblings()", function()
-        it("should return a userdata if the siblings are found", function()
+        it("should return the correct types depending on result for each tag", function()
             local filters = {
-                other = {name = "other"},
+                other = "other",
+                level2 = "level2",
+                level3 = "level3",
             }
             local table = Collect.siblings(level2, filters)
             expect(table.other).to.be.equal(otherLevel2)
-        end)
-        it("should error if any sibling is not found", function()
-            local filters = {
-                level2 = {name = "level2"},
-                other = {name = "other"},
-                level4 = {name = "level4"},
-            }
-            expect(function()
-                Collect.siblings(level3, filters)
-            end).to.throw()
+            expect(table.level2).to.be.equal(otherLevel2)
+            expect(#table.level3).to.be.equal(0)
         end)
     end)
 
