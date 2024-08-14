@@ -17,14 +17,14 @@
                         "Tags": ["level2"]
                     },
                     "level3": {
-                        "$className": "Folder",
+                        "$className": "Configuration",
                         "$properties": {
                             "Tags": ["level3"]
                         }
                     }
                 },
                 "other": {
-                    "$className": "Folder",
+                    "$className": "Configuration",
                     "$properties": {
                         "Tags": ["level2", "otherLevel2"]
                     }
