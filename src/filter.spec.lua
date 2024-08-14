@@ -13,11 +13,30 @@ return function()
             expect(filteredList).to.be.equal(list)
         end)
 
-        it("should filter by tag", function()
+        it("should filter by tag by default", function()
             local list = {level1, level2, otherLevel2, level3}
-            local filteredList = Filter.process(list, "level2")
+            local filteredList = Filter.process(list, "level2", "Tag")
             expect(filteredList[1]).to.be.equal(level2)
             expect(filteredList[2]).to.be.equal(otherLevel2)
+        end)
+
+        it("should filter by tag", function()
+            local list = {level1, level2, otherLevel2, level3}
+            local filteredList = Filter.process(list, "level2", "Tag")
+            expect(filteredList[1]).to.be.equal(level2)
+            expect(filteredList[2]).to.be.equal(otherLevel2)
+        end)
+
+        it("should filter by class name", function()
+            local list = {level1, level2, otherLevel2, level3}
+            local filteredList = Filter.process(list, "level2", "ClassName")
+            expect(#filteredList).to.be.equal(0)
+            filteredList = Filter.process(list, "Folder", "ClassName")
+            expect(#filteredList).to.be.equal(2)
+            filteredList = Filter.process(list, "Configuration", "ClassName")
+            expect(#filteredList).to.be.equal(2)
+            filteredList = Filter.process(list, "Instance", "ClassName")
+            expect(#filteredList).to.be.equal(4)
         end)
     end)
 end
