@@ -1,17 +1,14 @@
 [package]
 name = "steviegoodman/waiter"
 description = "Have your Roblox hierarchy instances served to you with convenience!"
-version = "5.0.1"
+version = "5.1.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 exclude = ["**"]
 include = [
     "src",
     "src/init.lua",
-    "src/filter.lua",
-    "src/get.lua",
-    "src/collect.lua",
-    "default.project.json", 
+    "default.project.json",
     "wally.toml"
 ]
 

@@ -9,18 +9,19 @@ Have your Roblox hierarchy instances served to you succinctly and safely!
 🎉 Congratulations! You've installed Waiter.
 
 # API
-## get
-The `get` module retrieves an instance, or set of instances, and returns them to you.
+Valid search modes:
+- "Tag"
+- "ClassName"
 ```lua
 -- Return nil if none are found
-get.child(origin, tag)
-get.sibling(origin, tag)
-get.descendant(origin, tag)
-get.ancestor(origin, tag)
+Waiter.getChild(origin, query, searchMode)
+Waiter.getSibling(origin, query, searchMode)
+Waiter.getDescendant(origin, query, searchMode)
+Waiter.getAncestor(origin, query, searchMode)
 
 -- Return empty table if none are found
-get.children(origin, tag)
-get.siblings(origin, tag)
-get.descendants(origin, tag)
-get.ancestors(origin, tag)
+Waiter.getChildren(origin, query, searchMode)
+Waiter.getSiblings(origin, query, searchMode)
+Waiter.getDescendants(origin, query, searchMode)
+Waiter.getAncestors(origin, query, searchMode)
 ```
