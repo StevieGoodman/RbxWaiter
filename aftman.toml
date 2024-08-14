@@ -1,1 +1,1 @@
-tools = { rojo = "rojo-rbx/rojo@7.4.3" }
+tools = { rojo = "rojo-rbx/rojo@7.4.3" , wally = "UpliftGames/Wally@0.3.2" }
