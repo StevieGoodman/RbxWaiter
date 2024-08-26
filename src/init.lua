@@ -1,3 +1,4 @@
+local Promise = require(script.Parent.Promise)
 local TableUtil = require(script.Parent.TableUtil)
 
 export type SearchMode = "Tag" | "ClassName"
@@ -33,13 +34,13 @@ function Waiter.getChild(origin: Instance, query: string?, searchMode: SearchMod
     return children[1]
 end
 
+--[[
+    Returns a promise that resolves when a child that matches a query is found.
+
+    If the promise is cancelled, the search is stopped.
+]]
 function Waiter.waitForChild(origin: Instance, query: string?, searchMode: SearchMode?)
-    local child = Waiter.getChild(origin, query, searchMode)
-    if child then
-        return child
-    else
-        return origin.ChildAdded:Wait()
-    end
+    return Waiter.waitFor(origin, query, searchMode, Waiter.getChild)
 end
 
 --[[
@@ -59,6 +60,15 @@ end
 function Waiter.getDescendant(origin: Instance, query: string?, searchMode: SearchMode?)
     local descendants = Waiter.getDescendants(origin, query, searchMode)
     return descendants[1]
+end
+
+--[[
+    Returns a promise that resolves when a descendant that matches a query is found.
+
+    If the promise is cancelled, the search is stopped.
+]]
+function Waiter.waitForDescendant(origin: Instance, query: string?, searchMode: SearchMode?)
+    return Waiter.waitFor(origin, query, searchMode, Waiter.getDescendant)
 end
 
 --[[
@@ -119,6 +129,15 @@ function Waiter.getSibling(origin: Instance, query: string?, searchMode: SearchM
     return siblings[1]
 end
 
+--[[
+    Returns a promise that resolves when a sibling that matches a query is found.
+
+    If the promise is cancelled, the search is stopped.
+]]
+function Waiter.waitForSibling(origin: Instance, query: string?, searchMode: SearchMode?)
+    return Waiter.waitFor(origin, query, searchMode, Waiter.getSibling)
+end
+
 function Waiter.filterInstances(origin: Instance, query: string?, getFunc, searchMode: SearchMode?)
     local instances = getFunc(origin)
     searchMode = searchMode or "Tag"
@@ -129,6 +148,23 @@ function Waiter.filterInstances(origin: Instance, query: string?, getFunc, searc
             return SEARCH_MODE_FUNCTIONS[searchMode](instance, query)
         end)
     end
+end
+
+function Waiter.waitFor(origin, query, searchMode, searchFn)
+    return Promise.new(function(resolve, _, onCancel)
+        local cancelled = false
+        onCancel(function()
+            cancelled = true
+        end)
+        while not cancelled do
+            local result = searchFn(origin, query, searchMode)
+            if result ~= nil then
+                resolve(result)
+                return
+            end
+            task.wait()
+        end
+    end)
 end
 
 return Waiter
