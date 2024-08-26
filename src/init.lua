@@ -33,6 +33,15 @@ function Waiter.getChild(origin: Instance, query: string?, searchMode: SearchMod
     return children[1]
 end
 
+function Waiter.waitForChild(origin: Instance, query: string?, searchMode: SearchMode?)
+    local child = Waiter.getChild(origin, query, searchMode)
+    if child then
+        return child
+    else
+        return origin.ChildAdded:Wait()
+    end
+end
+
 --[[
     Returns a list of all the descendants that match a query.
 

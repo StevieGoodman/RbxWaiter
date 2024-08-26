@@ -14,6 +14,7 @@ include = [
 
 [dependencies]
 TableUtil = "sleitnick/table-util@1.2.0"
+Promise = "evaera/promise@4.0.0"
 
 [dev-dependencies]
 TestEZ = "roblox/testez@0.4.1"
