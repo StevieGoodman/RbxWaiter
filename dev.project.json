@@ -6,27 +6,63 @@
 
         "Workspace": {
             "$className": "Workspace",
-            "level1": {
+            "Level1": {
                 "$className": "Folder",
                 "$properties": {
-                    "Tags": ["level1"]
+                    "Tags": ["Level1", "WaiterInstance"],
+                    "Attributes": {
+                        "WaiterInstanceIds": {"String": "Level1"}
+                    }
                 },
-                "level2": {
+                "Level2": {
                     "$className": "Folder",
                     "$properties": {
-                        "Tags": ["level2"]
+                        "Tags": ["Level2", "WaiterInstance"],
+                        "Attributes": {
+                            "WaiterInstanceIds": {"String": "Level2"}
+                        }
                     },
-                    "level3": {
+                    "Level3": {
                         "$className": "Configuration",
                         "$properties": {
-                            "Tags": ["level3"]
+                            "Tags": ["Level3", "WaiterInstance"],
+                            "Attributes": {
+                                "WaiterInstanceIds": {"String": "Level3"}
+                            }
+                        },
+                        "Level1ObjectValue": {
+                            "$className": "ObjectValue",
+                            "$properties": {
+                                "Tags": ["Level1ObjectValue"]
+                            }
+                        },
+                        "Level2ObjectValue": {
+                            "$className": "ObjectValue",
+                            "$properties": {
+                                "Tags": ["Level2ObjectValue"]
+                            }
+                        },
+                        "OtherLevel2ObjectValue": {
+                            "$className": "ObjectValue",
+                            "$properties": {
+                                "Tags": ["Level2ObjectValue", "OtherLevel2ObjectValue"]
+                            }
+                        },
+                        "Level3ObjectValue": {
+                            "$className": "ObjectValue",
+                            "$properties": {
+                                "Tags": ["Level3ObjectValue"]
+                            }
                         }
                     }
                 },
-                "other": {
+                "OtherLevel2": {
                     "$className": "Configuration",
                     "$properties": {
-                        "Tags": ["level2", "otherLevel2"]
+                        "Tags": ["Level2", "OtherLevel2", "WaiterInstance"],
+                        "Attributes": {
+                            "WaiterInstanceIds": {"String": "Other,Level2"}
+                        }
                     }
                 }
             }

@@ -1,24 +1,28 @@
 local Waiter = require(script.Parent)
 
 return function()
-    local level1 = game.Workspace.level1
-    local level2 = level1.level2
-    local otherLevel2 = level1.other
-    local level3 = level2.level3
+    local level1 = game.Workspace.Level1
+    local level2 = level1.Level2
+    local otherLevel2 = level1.OtherLevel2
+    local level3 = level2.Level3
+    level3.Level1ObjectValue.Value = level1
+    level3.Level2ObjectValue.Value = level2
+    level3.OtherLevel2ObjectValue.Value = otherLevel2
+    level3.Level3ObjectValue.Value = level3
 
     describe("filterInstances()", function()
         it("should filter by tag by default", function()
             local filteredList = Waiter.filterInstances(
                 level1, nil, level1.GetDescendants, nil
             )
-            expect(#filteredList).to.be.equal(3)
+            expect(#filteredList).to.be.equal(7)
         end)
 
         it("should filter by tag", function()
             local filteredList = Waiter.filterInstances(
                 level1, nil, level1.GetDescendants, "Tag"
             )
-            expect(#filteredList).to.be.equal(3)
+            expect(#filteredList).to.be.equal(7)
         end)
 
         it("should filter by class name", function()
@@ -29,7 +33,7 @@ return function()
             filteredList = Waiter.filterInstances(level1.Parent, "Configuration", level1.Parent.getDescendants, "ClassName")
             expect(#filteredList).to.be.equal(2)
             filteredList = Waiter.filterInstances(level1, "Instance", level1.Parent.getDescendants, "ClassName")
-            expect(#filteredList).to.be.equal(3)
+            expect(#filteredList).to.be.equal(7)
         end)
     end)
 
@@ -41,7 +45,7 @@ return function()
             expect(table.find(children, otherLevel2) == nil).to.be.equal(false)
         end)
         it("should return empty table if no children are found", function()
-            local children = Waiter.getChildren(level3)
+            local children = Waiter.getChildren(level3.Level1ObjectValue)
             expect(#children).to.be.equal(0)
         end)
     end)
@@ -52,7 +56,7 @@ return function()
             expect(child).to.be.equal(level2)
         end)
         it("should return nil if no child is found", function()
-            local child = Waiter.getChild(level3)
+            local child = Waiter.getChild(level3.Level1ObjectValue)
             expect(child).to.be.equal(nil)
         end)
     end)
@@ -80,13 +84,13 @@ return function()
     describe("getDescendants()", function()
         it("should return a non-empty table if descendants are found", function()
             local descendants = Waiter.getDescendants(level1)
-            expect(#descendants).to.be.equal(3)
+            expect(#descendants).to.be.equal(7)
             expect(table.find(descendants, level2) == nil).to.be.equal(false)
             expect(table.find(descendants, otherLevel2) == nil).to.be.equal(false)
             expect(table.find(descendants, level3) == nil).to.be.equal(false)
         end)
         it("should return empty table if no descendants are found", function()
-            local descendants = Waiter.getDescendants(level3)
+            local descendants = Waiter.getDescendants(level3.Level1ObjectValue)
             expect(#descendants).to.be.equal(0)
         end)
     end)
@@ -97,7 +101,7 @@ return function()
             expect(descendant).to.be.equal(level2)
         end)
         it("should return nil if no descendant is found", function()
-            local descendant = Waiter.getDescendant(level3)
+            local descendant = Waiter.getDescendant(level3.Level1ObjectValue)
             expect(descendant).to.be.equal(nil)
         end)
     end)
@@ -154,6 +158,30 @@ return function()
         it("should return nil if no sibling is found", function()
             local sibling = Waiter.getSibling(level3)
             expect(sibling).to.be.equal(nil)
+        end)
+    end)
+
+    describe("fromObjectValues()", function()
+        it("should return a list of instances if found", function()
+            local table = Waiter.fromObjectValues(level1, "Level1ObjectValue")
+            expect(typeof(table)).to.be.equal("table")
+            expect(#table).to.be.equal(1)
+            expect(table[1]).to.be.equal(level1)
+
+            table = Waiter.fromObjectValues(level1, "Level2ObjectValue")
+            expect(#table).to.be.equal(2)
+
+            table = Waiter.fromObjectValues(level1, "OtherLevel2ObjectValue")
+            expect(#table).to.be.equal(1)
+            expect(table[1]).to.be.equal(otherLevel2)
+
+            table = Waiter.fromObjectValues(level1, "Level3ObjectValue")
+            expect(#table).to.be.equal(1)
+            expect(table[1]).to.be.equal(level3)
+        end)
+        it("should return empty table if no instance is found", function()
+            local instance = Waiter.fromObjectValues(level1, "NonexistentTag")
+            expect(#instance).to.be.equal(0)
         end)
     end)
 end

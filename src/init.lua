@@ -13,6 +13,8 @@ local SEARCH_MODE_FUNCTIONS = {
     end
 } :: { SearchModeFilterFunction }
 
+local DEFAULT_TIMEOUT = 10
+
 local Waiter = {}
 
 --[[
@@ -138,6 +140,19 @@ function Waiter.waitForSibling(origin: Instance, query: string?, searchMode: Sea
     return Waiter.waitFor(origin, query, searchMode, Waiter.getSibling)
 end
 
+--[[
+    Returns a list of all the instances stored within descendant object values that match the provided tag.
+]]
+function Waiter.fromObjectValues(origin: Instance, tag: string)
+    local tagged = Waiter.getDescendants(origin, tag, "Tag")
+    local objectValues = TableUtil.Filter(tagged, function(instance)
+        return instance:IsA("ObjectValue")
+    end)
+    return TableUtil.Map(objectValues, function(objectValue)
+        return objectValue.Value
+    end)
+end
+
 function Waiter.filterInstances(origin: Instance, query: string?, getFunc, searchMode: SearchMode?)
     local instances = getFunc(origin)
     searchMode = searchMode or "Tag"
@@ -164,7 +179,7 @@ function Waiter.waitFor(origin, query, searchMode, searchFn)
             end
             task.wait()
         end
-    end)
+    end):timeout(DEFAULT_TIMEOUT)
 end
 
 return Waiter
