@@ -1,124 +1,236 @@
+local HttpService = game:GetService("HttpService")
+local Promise = require(script.Parent.Promise)
 local TableUtil = require(script.Parent.TableUtil)
 
-export type SearchMode = "Tag" | "ClassName"
-type SearchModeFilterFunction = (Instance, string) -> boolean
+export type SearchPredicate = (Instance) -> boolean
+export type SearchQuery = {
+    Tag: string?,
+    ClassName: string?,
+    Name: string?,
+    Predicate: SearchPredicate?,
+}
 
-local SEARCH_MODE_FUNCTIONS = {
-    Tag = function(instance, tagQuery)
-        return instance:HasTag(tagQuery)
-    end,
-    ClassName = function(instance, classNameQuery)
-        return instance:IsA(classNameQuery)
-    end
-} :: { SearchModeFilterFunction }
+local DEFAULT_TIMEOUT = 10
 
 local Waiter = {}
 
---[[
-    Returns a list of all the children that match a query.
+Waiter._trackedQueries = {}
+setmetatable(Waiter._trackedQueries, {__mode = "v"})
 
-    If none are found, an empty table is returned.
+--[[
+    Returns a list of all the instances that match a predicate.
 ]]
-function Waiter.getChildren(origin: Instance, query: string?, searchMode: SearchMode?)
-    return Waiter.filterInstances(origin, query, origin.GetChildren, searchMode)
+function Waiter.get(list: {Instance}, predicate: SearchPredicate): {Instance?}
+    return TableUtil.Filter(list, predicate)
 end
 
 --[[
-    Returns the first child that matches a query.
-
-    If none are found, `nil` is returned.
+    Returns the first instance that matches a predicate.
 ]]
-function Waiter.getChild(origin: Instance, query: string?, searchMode: SearchMode?)
-    local children = Waiter.getChildren(origin, query, searchMode)
-    return children[1]
+function Waiter.getFirst(list: {Instance}, predicate: SearchPredicate): Instance?
+    return Waiter.get(list, predicate)[1]
 end
 
 --[[
-    Returns a list of all the descendants that match a query.
-
-    If none are found, an empty table is returned.
+    Returns a `Promise` that resolves when an instance that matches the predicate is found.
+    *Note: Default promise timeout is 10 seconds.*
 ]]
-function Waiter.getDescendants(origin: Instance, query: string?, searchMode: SearchMode?)
-    return Waiter.filterInstances(origin, query, origin.GetDescendants, searchMode)
+function Waiter.waitFor(list: {Instance}, predicate: SearchPredicate, timeout: number?)
+    return Promise.new(function(resolve, _, onCancel)
+        local cancelled = false
+        onCancel(function()
+            cancelled = true
+        end)
+        while not cancelled do
+            local result = Waiter.getFirst(list, predicate)
+            if result ~= nil then
+                resolve(result)
+                return
+            end
+            task.wait()
+        end
+    end)
+    :catch(function(err)
+        error(`Waiter.waitFor() failed: {err}`)
+    end)
+    :timeout(timeout or DEFAULT_TIMEOUT)
 end
 
 --[[
-    Returns the first descendant that matches a query.
-
-    If none are found, `nil` is returned.
+    Returns all the descendants of an instance.
 ]]
-function Waiter.getDescendant(origin: Instance, query: string?, searchMode: SearchMode?)
-    local descendants = Waiter.getDescendants(origin, query, searchMode)
-    return descendants[1]
+function Waiter.descendants(instance: Instance): {Instance?}
+    local key = HttpService:GenerateGUID()
+    Waiter._trackedQueries[key] = instance:GetDescendants()
+    local addedConnection
+    local removedConnection
+    addedConnection = instance.DescendantAdded:Connect(function(descendant: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            addedConnection:Disconnect()
+            removedConnection:Disconnect()
+        else
+            table.insert(Waiter._trackedQueries[key], descendant)
+        end
+    end)
+    removedConnection = instance.DescendantRemoving:Connect(function(descendant: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            addedConnection:Disconnect()
+            removedConnection:Disconnect()
+        else
+            local index = table.find(Waiter._trackedQueries[key], descendant)
+            table.remove(Waiter._trackedQueries[key], index)
+        end
+    end)
+    return Waiter._trackedQueries[key]
 end
 
 --[[
-    Returns a list of all the ancestors that match a query.
-
-    If none are found, an empty table is returned.
+    Returns all the children of an instance.
 ]]
-function Waiter.getAncestors(origin: Instance, query: string?, searchMode: SearchMode?)
-    local function getFn()
+function Waiter.children(instance: Instance): {Instance?}
+    local key = HttpService:GenerateGUID()
+    Waiter._trackedQueries[key] = instance:GetChildren()
+    local addedConnection
+    local removedConnection
+    addedConnection = instance.ChildAdded:Connect(function(child: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            addedConnection:Disconnect()
+            removedConnection:Disconnect()
+        else
+            table.insert(Waiter._trackedQueries[key], child)
+        end
+    end)
+    removedConnection = instance.ChildRemoved:Connect(function(child: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            addedConnection:Disconnect()
+            removedConnection:Disconnect()
+        else
+            local index = table.find(Waiter._trackedQueries[key], child)
+            table.remove(Waiter._trackedQueries[key], index)
+        end
+    end)
+    return Waiter._trackedQueries[key]
+end
+
+--[[
+    Returns all the siblings of an instance.
+]]
+function Waiter.siblings(instance: Instance): {Instance?}
+    local key = HttpService:GenerateGUID()
+    Waiter._trackedQueries[key] = instance.Parent:GetChildren()
+    local index = table.find(Waiter._trackedQueries[key], instance)
+    table.remove(Waiter._trackedQueries[key], index)
+    local addedConnection
+    local removedConnection
+    addedConnection = instance.Parent.ChildAdded:Connect(function(child: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            addedConnection:Disconnect()
+            removedConnection:Disconnect()
+        elseif child ~= instance then
+            table.insert(Waiter._trackedQueries[key], child)
+        end
+    end)
+    removedConnection = instance.Parent.ChildRemoved:Connect(function(child: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            addedConnection:Disconnect()
+            removedConnection:Disconnect()
+        elseif child ~= instance then
+            index = table.find(Waiter._trackedQueries[key], child)
+            table.remove(Waiter._trackedQueries[key], index)
+        end
+    end)
+    return Waiter._trackedQueries[key]
+end
+
+--[[
+    Returns all the ancestors of an instance.
+    *Note: Excludes the datamodel itself.*
+]]
+function Waiter.ancestors(instance: Instance): {Instance?}
+    local function getAncestors(): {Instance?}
         local ancestors = {}
-        local current = origin
-        while current.Parent ~= game do
+        local current = instance
+        while current ~= game do
             current = current.Parent
             table.insert(ancestors, current)
         end
         return ancestors
     end
-    return Waiter.filterInstances(origin, query, getFn, searchMode)
-end
-
---[[
-    Returns the first ancestor that matches a query.
-
-    If none are found, `nil` is returned.
-]]
-function Waiter.getAncestor(origin: Instance, query: string?, searchMode: SearchMode?)
-    local ancestors = Waiter.getAncestors(origin, query, searchMode)
-    return ancestors[1]
-end
-
---[[
-    Returns a list of all siblings that matches a query.
-
-    If none are found, an empty table is returned.
-]]
-function Waiter.getSiblings(origin: Instance, query: string?, searchMode: SearchMode?)
-    -- Prevents attempting to index game's parent
-    if origin == game then
-        return {}
-    else
-        local siblings = Waiter.filterInstances(origin.Parent, query, origin.Parent.GetChildren, searchMode)
-        -- Removes the origin from the siblings if applicable
-        local originIndex = table.find(siblings, origin)
-        if originIndex then
-            table.remove(siblings, originIndex)
+    local key = HttpService:GenerateGUID()
+    Waiter._trackedQueries[key] = getAncestors()
+    if instance == game then
+        return Waiter._trackedQueries[key]
+    end
+    local ancestryConnection
+    ancestryConnection = instance.AncestryChanged:Connect(function(_: Instance, _: Instance)
+        if Waiter._trackedQueries[key] == nil then
+            ancestryConnection:Disconnect()
+        else
+            local newAncestors = getAncestors()
+            table.clear(Waiter._trackedQueries[key])
+            for _, newAncestor in newAncestors do
+                table.insert(Waiter._trackedQueries[key], newAncestor)
+            end
         end
-        return siblings
+    end)
+    return Waiter._trackedQueries[key]
+end
+
+--[[
+    Returns a `SearchPredicate` that matches instances with a specific tag.
+]]
+function Waiter.matchTag(tagQuery: string): SearchPredicate
+    return function(instance: Instance): boolean
+        return instance:HasTag(tagQuery)
     end
 end
 
 --[[
-    Returns the first sibling that matches a query.
-
-    If none are found, `nil` is returned.
+    Returns a `SearchPredicate` that matches instances with a specific attribute.
 ]]
-function Waiter.getSibling(origin: Instance, query: string?, searchMode: SearchMode?)
-    local siblings = Waiter.getSiblings(origin, query, searchMode)
-    return siblings[1]
+function Waiter.matchAttribute(name: string, value: any): SearchPredicate
+    return function(instance: Instance): boolean
+        return instance:GetAttribute(name) == value
+    end
 end
 
-function Waiter.filterInstances(origin: Instance, query: string?, getFunc, searchMode: SearchMode?)
-    local instances = getFunc(origin)
-    searchMode = searchMode or "Tag"
-    if not query then
-        return instances
-    else
-        return TableUtil.Filter(instances, function(instance)
-            return SEARCH_MODE_FUNCTIONS[searchMode](instance, query)
-        end)
+--[[
+    Returns a `SearchPredicate` that matches instances with a specific class name.
+]]
+function Waiter.matchClassName(className: string): SearchPredicate
+    return function(instance: Instance): boolean
+        return instance:IsA(className)
+    end
+end
+
+--[[
+    Returns a `SearchPredicate` that matches instances with a specific name.
+]]
+function Waiter.matchName(name: string): SearchPredicate
+    return function(instance: Instance): boolean
+        return instance.Name == name
+    end
+end
+
+--[[
+    Returns a `SearchPredicate` that matches instances with a specific combination of queries.
+]]
+function Waiter.matchQuery(query: SearchQuery): SearchPredicate
+    return function(instance: Instance): boolean
+        local matches = true
+        if query.Tag ~= nil then
+            matches = matches and Waiter.matchTag(query.Tag)(instance)
+        end
+        if query.ClassName ~= nil then
+            matches = matches and Waiter.matchClassName(query.ClassName)(instance)
+        end
+        if query.Name ~= nil then
+            matches = matches and Waiter.matchName(query.Name)(instance)
+        end
+        if query.Predicate ~= nil then
+            matches = matches and query.Predicate(instance)
+        end
+        return matches
     end
 end
 
