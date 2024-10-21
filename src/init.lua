@@ -61,7 +61,8 @@ end
 ]]
 function Waiter.descendants(instance: Instance): {Instance?}
     local key = HttpService:GenerateGUID()
-    Waiter._trackedQueries[key] = instance:GetDescendants()
+    local list = instance:GetDescendants()
+    Waiter._trackedQueries[key] = list
     local addedConnection
     local removedConnection
     addedConnection = instance.DescendantAdded:Connect(function(descendant: Instance)
@@ -89,7 +90,8 @@ end
 ]]
 function Waiter.children(instance: Instance): {Instance?}
     local key = HttpService:GenerateGUID()
-    Waiter._trackedQueries[key] = instance:GetChildren()
+    local list = instance:GetChildren()
+    Waiter._trackedQueries[key] = list
     local addedConnection
     local removedConnection
     addedConnection = instance.ChildAdded:Connect(function(child: Instance)
@@ -117,7 +119,8 @@ end
 ]]
 function Waiter.siblings(instance: Instance): {Instance?}
     local key = HttpService:GenerateGUID()
-    Waiter._trackedQueries[key] = instance.Parent:GetChildren()
+    local list = instance.Parent:GetChildren()
+    Waiter._trackedQueries[key] = list
     local index = table.find(Waiter._trackedQueries[key], instance)
     table.remove(Waiter._trackedQueries[key], index)
     local addedConnection
@@ -157,7 +160,8 @@ function Waiter.ancestors(instance: Instance): {Instance?}
         return ancestors
     end
     local key = HttpService:GenerateGUID()
-    Waiter._trackedQueries[key] = getAncestors()
+    local list = getAncestors()
+    Waiter._trackedQueries[key] = list
     if instance == game then
         return Waiter._trackedQueries[key]
     end
