@@ -154,6 +154,7 @@ function Waiter.ancestors(instance: Instance): {Instance?}
         local ancestors = {}
         local current = instance
         while current ~= game do
+            if current.Parent == nil then break end
             current = current.Parent
             table.insert(ancestors, current)
         end
@@ -171,6 +172,10 @@ function Waiter.ancestors(instance: Instance): {Instance?}
             ancestryConnection:Disconnect()
         else
             local newAncestors = getAncestors()
+            if #newAncestors == 0 then
+                Waiter._trackedQueries[key] = {}
+                return
+            end
             table.clear(Waiter._trackedQueries[key])
             for _, newAncestor in newAncestors do
                 table.insert(Waiter._trackedQueries[key], newAncestor)
